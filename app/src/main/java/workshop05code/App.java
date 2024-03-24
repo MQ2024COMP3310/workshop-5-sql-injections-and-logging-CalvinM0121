@@ -38,14 +38,18 @@ public class App {
 
         wordleDatabaseConnection.createNewDatabase("words.db");
         if (wordleDatabaseConnection.checkIfConnectionDefined()) {
+            logger.log(Level.INFO, "Wordle created and connected.");
             System.out.println("Wordle created and connected.");
         } else {
+            logger.log(Level.SEVERE, "Not able to connect. Sorry!");
             System.out.println("Not able to connect. Sorry!");
             return;
         }
         if (wordleDatabaseConnection.createWordleTables()) {
+            logger.log(Level.INFO, "Wordle structures in place.");
             System.out.println("Wordle structures in place.");
         } else {
+            logger.log(Level.SEVERE,"Not able to launch. Sorry!");
             System.out.println("Not able to launch. Sorry!");
             return;
         }
@@ -56,14 +60,21 @@ public class App {
             String line;
             int i = 1;
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
-                wordleDatabaseConnection.addValidWord(i, line);
+                if (isValidWord(line)) {
+                    wordleDatabaseConnection.addValidWord(i, line);
+                    logger.log(Level.INFO, "Added valid word from data.txt: " + line);
+                    System.out.println("Added valid word from data.txt: " + line);
+                } else {
+                    logger.log(Level.SEVERE, "Invalid word from data.txt: " + line);
+                    System.out.println("Invalid word from data.txt: " + line);
+                }
                 i++;
             }
 
         } catch (IOException e) {
+            logger.log(Level.SEVERE, "Not able to load . Sorry!");
+            logger.log(Level.SEVERE, e.getMessage());
             System.out.println("Not able to load . Sorry!");
-            System.out.println(e.getMessage());
             return;
         }
 
@@ -75,16 +86,20 @@ public class App {
 
             while (!guess.equals("q")) {
                 if (isValidInput(guess)) {
+                    logger.log(Level.INFO, "You've guessed '" + guess + "'.");
                     System.out.println("You've guessed '" + guess + "'.");
 
                     if (wordleDatabaseConnection.isValidWord(guess)) { 
+                        logger.log(Level.INFO, "Success! It is in the the list.\n");
                         System.out.println("Success! It is in the the list.\n");
                     }
                     else{
+                        logger.log(Level.INFO, "Sorry. This word is NOT in the the list.\n");
                         System.out.println("Sorry. This word is NOT in the the list.\n");
                     }
                 }
                 else {
+                    logger.log(Level.INFO, "Invalid Input. Ignoring unacceptable input.");
                     System.out.println("Invalid Input. Ignoring unacceptable input.");
                 }
 
@@ -92,9 +107,15 @@ public class App {
                 guess = scanner.nextLine();
             }
         } catch (NoSuchElementException | IllegalStateException e) {
+            logger.log(Level.WARNING, "Error: ", e);
             e.printStackTrace();
         }
 
+    }
+
+    private static boolean isValidWord(String line) {
+        // TODO Auto-generated method stub
+        return line.matches("[a-z]{4}");
     }
 
     private static boolean isValidInput(String input) {
